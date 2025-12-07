@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import {
   BarChart,
   Bar,
@@ -20,9 +20,10 @@ import {
   CHART_COLORS,
   DAYS_OF_WEEK,
   MOCK_DAILY_NOTIFICATION_COUNTS,
+  TOOLTIP_STYLE,
 } from "@/constants";
 
-export default function Analytics() {
+function Analytics() {
   const { notifications } = useNotifications();
 
   // Calculate notifications per day for the last 7 days
@@ -90,13 +91,7 @@ export default function Analytics() {
               <CartesianGrid strokeDasharray="3 3" stroke="#E4E4E7" />
               <XAxis dataKey="name" stroke="#71717A" />
               <YAxis stroke="#71717A" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D4D4D8",
-                  borderRadius: "8px",
-                }}
-              />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
               <Bar dataKey="value" fill="#0A84FF" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -125,13 +120,7 @@ export default function Analytics() {
                   />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D4D4D8",
-                  borderRadius: "8px",
-                }}
-              />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
               <Legend
                 verticalAlign="bottom"
                 height={36}
@@ -146,3 +135,5 @@ export default function Analytics() {
     </Card>
   );
 }
+
+export default memo(Analytics);

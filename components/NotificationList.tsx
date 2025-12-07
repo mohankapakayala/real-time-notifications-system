@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  memo,
+  useCallback,
+} from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import Card from "./Card";
 import {
@@ -14,11 +21,11 @@ import {
 } from "lucide-react";
 import { FilterType, SortType, NotificationListProps } from "@/types";
 import { ITEMS_PER_PAGE } from "@/constants";
-import { formatTime } from "@/utils";
+import { formatTime, sortNotifications, paginate } from "@/utils";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
-export default function NotificationList({
-  initialFilter,
-}: NotificationListProps) {
+function NotificationList({ initialFilter }: NotificationListProps) {
   const {
     notifications,
     markAsRead,
@@ -35,6 +42,9 @@ export default function NotificationList({
   const [currentPage, setCurrentPage] = useState(1);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Debounce search query to improve performance
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   const filteredNotifications = useMemo(() => {
     let filtered = notifications;
 
@@ -45,42 +55,22 @@ export default function NotificationList({
       filtered = filtered.filter((n) => !n.read);
     }
 
-    // Apply search
-    if (searchQuery.trim()) {
+    // Apply search (using debounced value)
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter((n) =>
-        n.message.toLowerCase().includes(searchQuery.toLowerCase())
+        n.message.toLowerCase().includes(query)
       );
     }
 
     // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      if (sortBy === "newest") {
-        return (
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-      } else if (sortBy === "oldest") {
-        return (
-          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-      } else if (sortBy === "unread-first") {
-        // Unread first, then by newest
-        if (a.read !== b.read) {
-          return a.read ? 1 : -1;
-        }
-        return (
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-      }
-      return 0;
-    });
-
-    return sorted;
-  }, [notifications, filter, searchQuery, sortBy]);
+    return sortNotifications(filtered, sortBy);
+  }, [notifications, filter, debouncedSearchQuery, sortBy]);
 
   // Reset to page 1 when filter, search, or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter, searchQuery, sortBy]);
+  }, [filter, debouncedSearchQuery, sortBy]);
 
   // Update filter when initialFilter prop changes
   useEffect(() => {
@@ -90,46 +80,38 @@ export default function NotificationList({
   }, [initialFilter]);
 
   // Close sort dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        sortDropdownRef.current &&
-        !sortDropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowSortDropdown(false);
-      }
-    };
-
-    if (showSortDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showSortDropdown]);
-
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredNotifications.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedNotifications = filteredNotifications.slice(
-    startIndex,
-    endIndex
+  useClickOutside(
+    sortDropdownRef,
+    () => setShowSortDropdown(false),
+    showSortDropdown
   );
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  // Calculate pagination
+  const {
+    paginatedItems: paginatedNotifications,
+    totalPages,
+    startIndex,
+    endIndex,
+  } = paginate(filteredNotifications, currentPage, ITEMS_PER_PAGE);
 
-  const handleNotificationClick = (id: string, read: boolean) => {
-    if (!read) {
-      markAsRead(id);
-    }
-  };
+  const goToPage = useCallback(
+    (page: number) => {
+      if (page >= 1 && page <= totalPages) {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    },
+    [totalPages]
+  );
+
+  const handleNotificationClick = useCallback(
+    (id: string, read: boolean) => {
+      if (!read) {
+        markAsRead(id);
+      }
+    },
+    [markAsRead]
+  );
 
   return (
     <Card>
@@ -271,7 +253,7 @@ export default function NotificationList({
         </div>
       ) : (
         <>
-          {filteredNotifications.length === 0 && searchQuery.trim() ? (
+          {filteredNotifications.length === 0 && debouncedSearchQuery.trim() ? (
             <div className="text-center py-8" style={{ color: "#71717A" }}>
               <p>No notifications match your search</p>
             </div>
@@ -472,3 +454,5 @@ export default function NotificationList({
     </Card>
   );
 }
+
+export default memo(NotificationList);

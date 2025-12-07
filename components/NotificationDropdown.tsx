@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useMemo, memo, useRef } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { NotificationDropdownProps } from "@/types";
 import { MAX_DROPDOWN_NOTIFICATIONS } from "@/constants";
-import { formatTimeAsDate, formatTimeShort } from "@/utils";
+import { formatTimeAsDate, formatTimeShort, sortNotifications } from "@/utils";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
-export default function NotificationDropdown({
+function NotificationDropdown({
   isOpen,
   onClose,
   onViewAll,
@@ -15,35 +16,27 @@ export default function NotificationDropdown({
   const { notifications, markAsRead } = useNotifications();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get unread notifications, sorted by most recent first
-  const unreadNotifications = notifications
-    .filter((n) => !n.read)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, MAX_DROPDOWN_NOTIFICATIONS);
+  // Memoize unread notifications calculation
+  const unreadNotifications = useMemo(() => {
+    const unread = notifications.filter((n) => !n.read);
+    return sortNotifications(unread, "newest").slice(
+      0,
+      MAX_DROPDOWN_NOTIFICATIONS
+    );
+  }, [notifications]);
 
   // Close dropdown when clicking outside (but not on the bell icon)
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+  useClickOutside(
+    dropdownRef,
+    (event) => {
       const target = event.target as Node;
-      const isClickOnDropdown = dropdownRef.current?.contains(target);
       const isClickOnBell = bellIconRef?.current?.contains(target);
-
-      if (isOpen && !isClickOnDropdown && !isClickOnBell) {
+      if (!isClickOnBell && isOpen) {
         onClose();
       }
-    };
-
-    if (isOpen) {
-      // Use a small delay to allow the toggle click to complete first
-      setTimeout(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-      }, 0);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose, bellIconRef]);
+    },
+    isOpen
+  );
 
   if (!isOpen) return null;
 
@@ -64,7 +57,10 @@ export default function NotificationDropdown({
         </div>
       ) : (
         <>
-          <div className="overflow-y-auto flex-1" style={{ maxHeight: "400px" }}>
+          <div
+            className="overflow-y-auto flex-1"
+            style={{ maxHeight: "400px" }}
+          >
             {unreadNotifications.map((notification, index) => (
               <div
                 key={notification.id}
@@ -124,3 +120,4 @@ export default function NotificationDropdown({
   );
 }
 
+export default memo(NotificationDropdown);

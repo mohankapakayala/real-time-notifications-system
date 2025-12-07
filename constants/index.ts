@@ -49,3 +49,10 @@ export const MOCK_DAILY_NOTIFICATION_COUNTS = [8, 12, 15, 10, 18, 14] as const;
 
 // Maximum unread notifications to show in dropdown
 export const MAX_DROPDOWN_NOTIFICATIONS = 5;
+
+// Tooltip styles for charts
+export const TOOLTIP_STYLE = {
+  backgroundColor: "#FFFFFF",
+  border: "1px solid #D4D4D8",
+  borderRadius: "8px",
+} as const;

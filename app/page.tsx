@@ -1,12 +1,33 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  lazy,
+  Suspense,
+  useCallback,
+} from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import Sidebar from "@/components/Sidebar";
-import NotificationList from "@/components/NotificationList";
-import Analytics from "@/components/Analytics";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { Bell } from "lucide-react";
+import Card from "@/components/Card";
+
+// Lazy load heavy components for code splitting
+const NotificationList = lazy(() => import("@/components/NotificationList"));
+const Analytics = lazy(() => import("@/components/Analytics"));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <Card>
+    <div className="animate-pulse space-y-4">
+      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+      <div className="h-4 bg-gray-200 rounded"></div>
+      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+    </div>
+  </Card>
+);
 
 export default function Home() {
   const [activePage, setActivePage] = useState("notifications");
@@ -15,6 +36,22 @@ export default function Home() {
   const { unreadCount, addNotification } = useNotifications();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const bellIconRef = useRef<HTMLDivElement>(null);
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleViewAll = useCallback(() => {
+    setActivePage("notifications");
+    setShowUnreadOnly(true);
+    setTimeout(() => setShowUnreadOnly(false), 100);
+  }, []);
+
+  const handleCloseDropdown = useCallback(() => {
+    setShowDropdown(false);
+  }, []);
+
+  const handleToggleDropdown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDropdown((prev) => !prev);
+  }, []);
 
   // Simulate real-time notifications
   useEffect(() => {
@@ -59,21 +96,18 @@ export default function Home() {
       <main className="flex-1 lg:ml-64 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6 lg:mb-8">
+          <div className="flex justify-between items-center gap-4 mb-6 lg:mb-8">
             <h1
-              className="text-2xl lg:text-3xl font-bold"
+              className="text-xl sm:text-2xl lg:text-3xl font-bold truncate min-w-0 flex-1"
               style={{ color: "#1A1A1A" }}
             >
               Real-Time Notification System
             </h1>
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <div
                 ref={bellIconRef}
                 className="cursor-pointer inline-block relative"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDropdown(!showDropdown);
-                }}
+                onClick={handleToggleDropdown}
                 style={{ cursor: "pointer" }}
               >
                 <Bell
@@ -99,12 +133,8 @@ export default function Home() {
               </div>
               <NotificationDropdown
                 isOpen={showDropdown}
-                onClose={() => setShowDropdown(false)}
-                onViewAll={() => {
-                  setActivePage("notifications");
-                  setShowUnreadOnly(true);
-                  setTimeout(() => setShowUnreadOnly(false), 100);
-                }}
+                onClose={handleCloseDropdown}
+                onViewAll={handleViewAll}
                 bellIconRef={bellIconRef}
               />
             </div>
@@ -112,18 +142,20 @@ export default function Home() {
 
           {/* Content based on active page */}
           <div className="space-y-6">
-            {activePage === "notifications" && (
-              <NotificationList
-                initialFilter={showUnreadOnly ? "unread" : undefined}
-              />
-            )}
-            {activePage === "analytics" && <Analytics />}
-            {activePage === "dashboard" && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <NotificationList />
-                <Analytics />
-              </div>
-            )}
+            <Suspense fallback={<LoadingFallback />}>
+              {activePage === "notifications" && (
+                <NotificationList
+                  initialFilter={showUnreadOnly ? "unread" : undefined}
+                />
+              )}
+              {activePage === "analytics" && <Analytics />}
+              {activePage === "dashboard" && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <NotificationList />
+                  <Analytics />
+                </div>
+              )}
+            </Suspense>
             {activePage === "settings" && (
               <div
                 className="rounded-lg shadow-sm border p-6"

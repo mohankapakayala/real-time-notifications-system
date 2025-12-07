@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { CardProps } from "@/types";
 
-export default function Card({ children, className = "" }: CardProps) {
+const Card = memo(function Card({ children, className = "" }: CardProps) {
   return (
     <div
       className={`bg-white rounded-lg shadow-sm border p-6 ${className}`}
@@ -9,4 +10,8 @@ export default function Card({ children, className = "" }: CardProps) {
       {children}
     </div>
   );
-}
+});
+
+Card.displayName = "Card";
+
+export default Card;

@@ -6,10 +6,12 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
+  useRef,
 } from "react";
 import { Notification, NotificationContextType } from "@/types";
 import { STORAGE_KEYS } from "@/constants";
-import { createMockNotifications } from "@/utils";
+import { createMockNotifications, debounce } from "@/utils";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
   undefined
@@ -21,38 +23,62 @@ export function NotificationProvider({
   children: React.ReactNode;
 }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read
-  ).length;
+  const isInitialMount = useRef(true);
+  const debouncedSaveRef = useRef<ReturnType<typeof debounce> | null>(null);
 
-  // ---- Load once from localStorage ----
+  // Memoize unreadCount to prevent recalculation on every render
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.read).length,
+    [notifications]
+  );
+
+  // Initialize debounced save function
   useEffect(() => {
-    const storedNotifications = localStorage.getItem(
-      STORAGE_KEYS.NOTIFICATIONS
-    );
-
-    if (storedNotifications) {
+    debouncedSaveRef.current = debounce((data: Notification[]) => {
       try {
-        setNotifications(JSON.parse(storedNotifications));
-        return;
-      } catch {}
+        localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(data));
+      } catch (error) {
+        console.error("Failed to save notifications to localStorage:", error);
+      }
+    }, 500); // Debounce by 500ms
+  }, []);
+
+  // Load once from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedNotifications = localStorage.getItem(
+        STORAGE_KEYS.NOTIFICATIONS
+      );
+
+      if (storedNotifications) {
+        const parsed = JSON.parse(storedNotifications);
+        if (Array.isArray(parsed)) {
+          setNotifications(parsed);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load notifications from localStorage:", error);
     }
 
     // If nothing saved → use mock data
     const mockNotifications = createMockNotifications();
     setNotifications(mockNotifications);
-    localStorage.setItem(
-      STORAGE_KEYS.NOTIFICATIONS,
-      JSON.stringify(mockNotifications)
-    );
+    if (debouncedSaveRef.current) {
+      debouncedSaveRef.current(mockNotifications);
+    }
   }, []);
 
-  // ---- Save changes to localStorage ----
+  // Debounced save to localStorage (skip initial mount)
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.NOTIFICATIONS,
-      JSON.stringify(notifications)
-    );
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (debouncedSaveRef.current) {
+      debouncedSaveRef.current(notifications);
+    }
   }, [notifications]);
 
   // ---- Actions ----
@@ -112,27 +138,47 @@ export function NotificationProvider({
     setNotifications([]);
   }, []);
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo<NotificationContextType>(
+    () => ({
+      notifications,
+      unreadCount,
+      addNotification,
+      markAsRead,
+      markAsUnread,
+      markAllAsRead,
+      deleteNotification,
+      deleteAllNotifications,
+    }),
+    [
+      notifications,
+      unreadCount,
+      addNotification,
+      markAsRead,
+      markAsUnread,
+      markAllAsRead,
+      deleteNotification,
+      deleteAllNotifications,
+    ]
+  );
+
   return (
-    <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        addNotification,
-        markAsRead,
-        markAsUnread,
-        markAllAsRead,
-        deleteNotification,
-        deleteAllNotifications,
-      }}
-    >
+    <NotificationContext.Provider value={contextValue}>
       {children}
     </NotificationContext.Provider>
   );
 }
 
+/**
+ * Custom hook to access notification context
+ * @throws Error if used outside NotificationProvider
+ */
 export function useNotifications() {
   const context = useContext(NotificationContext);
-  if (!context)
-    throw new Error("useNotifications must be used inside Provider");
+  if (!context) {
+    throw new Error(
+      "useNotifications must be used inside NotificationProvider"
+    );
+  }
   return context;
 }
