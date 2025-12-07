@@ -15,3 +15,13 @@ export interface ChartData {
   value: number;
 }
 
+export interface NotificationContextType {
+  notifications: Notification[];
+  unreadCount: number;
+  addNotification: (notification: Notification) => void;
+  markAsRead: (id: string) => void;
+  markAsUnread: (id: string) => void;
+  markAllAsRead: () => void;
+  deleteNotification: (id: string) => void;
+  deleteAllNotifications: () => void;
+}
