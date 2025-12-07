@@ -43,7 +43,7 @@ function NotificationDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border z-50"
+      className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border z-30"
       style={{
         borderColor: "#D4D4D8",
         maxHeight: "500px",

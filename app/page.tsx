@@ -96,7 +96,7 @@ export default function Home() {
       <main className="flex-1 lg:ml-64 p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-center gap-4 mb-6 lg:mb-8">
+          <div className="flex justify-between items-center gap-4 mb-6 lg:mb-8 relative z-40 pl-12 lg:pl-0">
             <h1
               className="text-xl sm:text-2xl lg:text-3xl font-bold truncate min-w-0 flex-1"
               style={{ color: "#1A1A1A" }}
