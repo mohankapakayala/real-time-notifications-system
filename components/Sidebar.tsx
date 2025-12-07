@@ -10,11 +10,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-
-interface SidebarProps {
-  activePage: string;
-  onPageChange: (page: string) => void;
-}
+import { SidebarProps } from "@/types";
 
 export default function Sidebar({ activePage, onPageChange }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");

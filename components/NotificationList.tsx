@@ -12,13 +12,9 @@ import {
   ArrowUpDown,
   ChevronDown,
 } from "lucide-react";
-
-type FilterType = "all" | "read" | "unread";
-type SortType = "newest" | "oldest" | "unread-first";
-
-interface NotificationListProps {
-  initialFilter?: FilterType;
-}
+import { FilterType, SortType, NotificationListProps } from "@/types";
+import { ITEMS_PER_PAGE } from "@/constants";
+import { formatTime } from "@/utils";
 
 export default function NotificationList({
   initialFilter,
@@ -37,7 +33,6 @@ export default function NotificationList({
   const [sortBy, setSortBy] = useState<SortType>("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const filteredNotifications = useMemo(() => {
@@ -115,9 +110,9 @@ export default function NotificationList({
   }, [showSortDropdown]);
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const totalPages = Math.ceil(filteredNotifications.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedNotifications = filteredNotifications.slice(
     startIndex,
     endIndex
@@ -128,27 +123,6 @@ export default function NotificationList({
       setCurrentPage(page);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  };
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
   };
 
   const handleNotificationClick = (id: string, read: boolean) => {

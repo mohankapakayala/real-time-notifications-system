@@ -2,13 +2,9 @@
 
 import React, { useEffect, useRef } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
-
-interface NotificationDropdownProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onViewAll: () => void;
-  bellIconRef?: React.RefObject<HTMLDivElement | null>;
-}
+import { NotificationDropdownProps } from "@/types";
+import { MAX_DROPDOWN_NOTIFICATIONS } from "@/constants";
+import { formatTimeAsDate, formatTimeShort } from "@/utils";
 
 export default function NotificationDropdown({
   isOpen,
@@ -23,7 +19,7 @@ export default function NotificationDropdown({
   const unreadNotifications = notifications
     .filter((n) => !n.read)
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    .slice(0, 5); // Show top 5 most recent
+    .slice(0, MAX_DROPDOWN_NOTIFICATIONS);
 
   // Close dropdown when clicking outside (but not on the bell icon)
   useEffect(() => {
@@ -48,44 +44,6 @@ export default function NotificationDropdown({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose, bellIconRef]);
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const formatTimeShort = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 7) return `${diffDays}d`;
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   if (!isOpen) return null;
 
@@ -133,7 +91,7 @@ export default function NotificationDropdown({
                     {notification.message}
                   </p>
                   <p className="text-xs" style={{ color: "#A1A1AA" }}>
-                    {formatTime(notification.timestamp)}
+                    {formatTimeAsDate(notification.timestamp)}
                   </p>
                 </div>
                 <p

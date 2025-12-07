@@ -25,3 +25,28 @@ export interface NotificationContextType {
   deleteNotification: (id: string) => void;
   deleteAllNotifications: () => void;
 }
+
+export type FilterType = "all" | "read" | "unread";
+
+export type SortType = "newest" | "oldest" | "unread-first";
+
+export interface NotificationListProps {
+  initialFilter?: FilterType;
+}
+
+export interface SidebarProps {
+  activePage: string;
+  onPageChange: (page: string) => void;
+}
+
+export interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export interface NotificationDropdownProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onViewAll: () => void;
+  bellIconRef?: React.RefObject<HTMLDivElement | null>;
+}

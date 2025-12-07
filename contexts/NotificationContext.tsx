@@ -8,22 +8,12 @@ import React, {
   useCallback,
 } from "react";
 import { Notification, NotificationContextType } from "@/types";
+import { STORAGE_KEYS } from "@/constants";
+import { createMockNotifications } from "@/utils";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
   undefined
 );
-
-const STORAGE_KEY = "notifications";
-
-function createMockNotifications(): Notification[] {
-  const now = Date.now();
-  return Array.from({ length: 10 }).map((_, index) => ({
-    id: `mock-${now}-${index + 1}`,
-    message: `Sample notification ${index + 1}`,
-    timestamp: new Date(now - (index + 1) * 20 * 60000).toISOString(),
-    read: index % 2 === 0 ? false : true,
-  }));
-}
 
 export function NotificationProvider({
   children,
@@ -37,7 +27,9 @@ export function NotificationProvider({
 
   // ---- Load once from localStorage ----
   useEffect(() => {
-    const storedNotifications = localStorage.getItem(STORAGE_KEY);
+    const storedNotifications = localStorage.getItem(
+      STORAGE_KEYS.NOTIFICATIONS
+    );
 
     if (storedNotifications) {
       try {
@@ -49,12 +41,18 @@ export function NotificationProvider({
     // If nothing saved → use mock data
     const mockNotifications = createMockNotifications();
     setNotifications(mockNotifications);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockNotifications));
+    localStorage.setItem(
+      STORAGE_KEYS.NOTIFICATIONS,
+      JSON.stringify(mockNotifications)
+    );
   }, []);
 
   // ---- Save changes to localStorage ----
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+    localStorage.setItem(
+      STORAGE_KEYS.NOTIFICATIONS,
+      JSON.stringify(notifications)
+    );
   }, [notifications]);
 
   // ---- Actions ----
