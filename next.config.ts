@@ -3,12 +3,22 @@ import type { NextConfig } from "next";
 // Bundle analyzer (optional - run with ANALYZE=true npm run build)
 let withBundleAnalyzer: any = (config: NextConfig) => config;
 if (process.env.ANALYZE === "true") {
-  withBundleAnalyzer = require("@next/bundle-analyzer")({
-    enabled: true,
-  });
+  try {
+    withBundleAnalyzer = require("@next/bundle-analyzer")({
+      enabled: true,
+    });
+  } catch (e) {
+    // Bundle analyzer not installed, skip it
+    console.warn(
+      "Bundle analyzer not available. Install with: npm install --save-dev @next/bundle-analyzer"
+    );
+  }
 }
 
 const nextConfig: NextConfig = {
+  // Turbopack configuration (required to avoid build errors with Next.js 16+)
+  turbopack: {},
+
   // Optimize production builds
   compiler: {
     // Remove console logs in production (optional)
@@ -23,6 +33,10 @@ const nextConfig: NextConfig = {
   // Webpack configuration for better tree shaking
   webpack: (config, { isServer }) => {
     // Enable tree shaking for all modules
+    if (!config.optimization) {
+      config.optimization = {};
+    }
+
     config.optimization = {
       ...config.optimization,
       usedExports: true, // Mark unused exports
@@ -30,6 +44,10 @@ const nextConfig: NextConfig = {
     };
 
     // Ensure proper module resolution for tree shaking
+    if (!config.resolve) {
+      config.resolve = {};
+    }
+
     config.resolve = {
       ...config.resolve,
       mainFields: ["module", "main"], // Prefer ES modules for better tree shaking
