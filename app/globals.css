@@ -26,6 +26,16 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Prevent layout shifts from font loading */
+html {
+  font-display: swap;
+}
+
+/* Reserve space for dynamic content to prevent CLS */
+[data-reserve-space] {
+  min-height: 1px; /* Reserve minimum space */
+}
+
 /* Smooth animations */
 * {
   transition-property: background-color, border-color, color, fill, stroke,

@@ -6,11 +6,15 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Prevent layout shift during font load
+  preload: true, // Preload fonts to reduce shift
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap", // Prevent layout shift during font load
+  preload: true, // Preload fonts to reduce shift
 });
 
 export const metadata: Metadata = {
