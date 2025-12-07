@@ -2,11 +2,18 @@
   "name": "real-time-notifications",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss",
+    "**/globals.css",
+    "./app/globals.css"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "next": "16.0.7",
@@ -16,6 +23,7 @@
     "lucide-react": "^0.469.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

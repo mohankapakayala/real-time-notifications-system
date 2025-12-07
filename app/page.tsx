@@ -1,16 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  NotificationProvider,
-  useNotifications,
-} from "@/contexts/NotificationContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import Sidebar from "@/components/Sidebar";
 import NotificationList from "@/components/NotificationList";
 import Analytics from "@/components/Analytics";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { Bell } from "lucide-react";
-import { Notification } from "@/types";
 
 function DashboardContent() {
   const [activePage, setActivePage] = useState("notifications");
@@ -142,9 +138,5 @@ function DashboardContent() {
 }
 
 export default function Home() {
-  return (
-    <NotificationProvider>
-      <DashboardContent />
-    </NotificationProvider>
-  );
+  return <DashboardContent />;
 }

@@ -13,6 +13,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    // Tree shaking optimizations
+    "importsNotUsedAsValues": "remove",
+    "preserveValueImports": false,
     "plugins": [
       {
         "name": "next"
