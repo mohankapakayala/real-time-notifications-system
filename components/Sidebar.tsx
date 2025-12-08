@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { FolderOpen, Bell, BarChart3, Settings, Search, X } from "lucide-react";
 import { SidebarProps } from "@/types";
-import { COLORS } from "@/constants";
+import "@/app/components.css";
 
 // Move menuItems outside component to avoid recreation on every render
 const MENU_ITEMS = [
@@ -61,17 +61,13 @@ function Sidebar({
 
       {/* Sidebar */}
       <div
-        className={`w-64 text-white h-screen fixed left-0 top-0 flex flex-col z-30 transform transition-transform duration-300 ease-in-out ${
+        className={`w-64 text-white h-screen fixed left-0 top-0 flex flex-col z-30 transform transition-transform duration-300 ease-in-out sidebar-bg ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
-        style={{ backgroundColor: COLORS.PRIMARY }}
       >
         {/* Mobile Close Button */}
         {isMobileOpen && setIsMobileOpen && (
-          <div
-            className="lg:hidden flex justify-end p-4 border-b"
-            style={{ borderColor: "rgba(255,255,255,0.2)" }}
-          >
+          <div className="lg:hidden flex justify-end p-4 border-b border-sidebar">
             <button
               onClick={handleCloseMenu}
               className="p-2 rounded-full hover:bg-white/10 transition"
@@ -82,10 +78,7 @@ function Sidebar({
           </div>
         )}
         {/* Search */}
-        <div
-          className="p-4 border-b"
-          style={{ borderColor: "rgba(255,255,255,0.2)" }}
-        >
+        <div className="p-4 border-b border-sidebar">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white opacity-70 w-4 h-4" />
             <input
@@ -93,11 +86,7 @@ function Sidebar({
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg text-white placeholder-white/50 border"
-              style={{
-                backgroundColor: "rgba(255,255,255,0.15)",
-                borderColor: "rgba(255,255,255,0.2)",
-              }}
+              className="w-full pl-10 pr-4 py-2 rounded-lg text-white placeholder-white/50 border sidebar-search-bg sidebar-search-border"
             />
           </div>
         </div>
@@ -114,14 +103,9 @@ function Sidebar({
                 onClick={() => handlePageChange(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
                   isActive
-                    ? "text-white shadow-md"
+                    ? "text-white shadow-md sidebar-menu-active"
                     : "text-white/70 hover:text-white"
                 }`}
-                style={{
-                  backgroundColor: isActive
-                    ? "rgba(255,255,255,0.2)"
-                    : "transparent",
-                }}
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-medium">{item.label}</span>

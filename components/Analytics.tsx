@@ -13,6 +13,7 @@ import {
   Pie,
   Cell,
   Legend,
+  Label,
 } from "recharts";
 import Card from "./Card";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -22,6 +23,7 @@ import {
   MOCK_DAILY_NOTIFICATION_COUNTS,
   TOOLTIP_STYLE,
 } from "@/constants";
+import "@/app/components.css";
 
 function Analytics() {
   const { notifications } = useNotifications();
@@ -57,33 +59,39 @@ function Analytics() {
   }, [notifications]);
 
   // Calculate read vs unread
-  const pieData = useMemo(() => {
-    const readCount = notifications.filter((n) => n.read).length;
-    const unreadCount = notifications.filter((n) => !n.read).length;
+  const { pieData, readCount, unreadCount } = useMemo(() => {
+    const read = notifications.filter((n) => n.read).length;
+    const unread = notifications.filter((n) => !n.read).length;
     const total = notifications.length;
 
     if (total === 0) {
-      return [
-        { name: "Read", value: 0 },
-        { name: "Unread", value: 0 },
-      ];
+      return {
+        pieData: [
+          { name: "Read", value: 0 },
+          { name: "Unread", value: 0 },
+        ],
+        readCount: 0,
+        unreadCount: 0,
+      };
     }
 
-    return [
-      { name: "Read", value: Math.round((readCount / total) * 100) },
-      { name: "Unread", value: Math.round((unreadCount / total) * 100) },
-    ];
+    return {
+      pieData: [
+        { name: "Read", value: Math.round((read / total) * 100) },
+        { name: "Unread", value: Math.round((unread / total) * 100) },
+      ],
+      readCount: read,
+      unreadCount: unread,
+    };
   }, [notifications]);
 
   return (
     <Card>
-      <h2 className="text-xl font-bold mb-6" style={{ color: "#1A1A1A" }}>
-        Analytics
-      </h2>
+      <h2 className="text-xl font-bold mb-6 text-primary">Analytics</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[300px]">
         {/* Bar Chart */}
         <div>
-          <h3 className="text-sm font-medium mb-4" style={{ color: "#71717A" }}>
+          <h3 className="text-sm font-medium mb-4 text-secondary">
             Notifications per Day
           </h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -99,7 +107,7 @@ function Analytics() {
 
         {/* Donut Chart */}
         <div>
-          <h3 className="text-sm font-medium mb-4" style={{ color: "#71717A" }}>
+          <h3 className="text-sm font-medium mb-4 text-secondary">
             Read vs Unread
           </h3>
           <ResponsiveContainer width="100%" height={250}>
@@ -119,13 +127,28 @@ function Analytics() {
                     fill={CHART_COLORS[index % CHART_COLORS.length]}
                   />
                 ))}
+                <Label
+                  value={`Unread : ${unreadCount}`}
+                  position="center"
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    fill: "#0A84FF",
+                  }}
+                />
               </Pie>
-              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Tooltip
+                contentStyle={TOOLTIP_STYLE}
+                formatter={(value: number, name: string) => [
+                  `${value}% (${name === "Read" ? readCount : unreadCount})`,
+                  name,
+                ]}
+              />
               <Legend
                 verticalAlign="bottom"
                 height={36}
                 formatter={(value) => (
-                  <span style={{ color: "#71717A" }}>{value}</span>
+                  <span className="text-secondary">{value}</span>
                 )}
               />
             </PieChart>

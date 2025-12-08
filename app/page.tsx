@@ -14,7 +14,8 @@ import NotificationDropdown from "@/components/NotificationDropdown";
 import BellIcon from "@/components/BellIcon";
 import { Menu } from "lucide-react";
 import Card from "@/components/Card";
-import { APP_TITLE, COLORS } from "@/constants";
+import { APP_TITLE } from "@/constants";
+import "@/app/components.css";
 
 const NotificationList = lazy(() => import("@/components/NotificationList"));
 const Analytics = lazy(() => import("@/components/Analytics"));
@@ -93,10 +94,7 @@ export default function Home() {
   }, [addNotification]);
 
   return (
-    <div
-      className="flex min-h-screen overflow-hidden"
-      style={{ backgroundColor: COLORS.BACKGROUND }}
-    >
+    <div className="flex min-h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <Sidebar
         activePage={activePage}
@@ -115,18 +113,14 @@ export default function Home() {
               {/* Mobile menu button */}
               <button
                 onClick={toggleMobileMenu}
-                className="lg:hidden p-2 rounded-xl shadow-md"
-                style={{ backgroundColor: COLORS.PRIMARY }}
+                className="lg:hidden p-2 rounded-xl shadow-md bg-primary"
                 aria-label="Toggle menu"
               >
                 <Menu className="w-6 h-6 text-white" />
               </button>
 
               {/* Title — same on mobile */}
-              <h1
-                className="text-xl sm:text-2xl lg:text-3xl font-bold truncate flex-1"
-                style={{ color: COLORS.TEXT_PRIMARY }}
-              >
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate flex-1 text-primary">
                 {APP_TITLE}
               </h1>
 
@@ -164,6 +158,20 @@ export default function Home() {
           <Suspense fallback={<LoadingFallback />}>
             {activePage === "notifications" && <NotificationList />}
             {activePage === "analytics" && <Analytics />}
+            {activePage === "dashboard" && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <NotificationList />
+                <Analytics />
+              </div>
+            )}
+            {activePage === "settings" && (
+              <Card>
+                <h2 className="text-xl font-bold mb-4 text-primary">
+                  Settings
+                </h2>
+                <p className="text-secondary">Settings page coming soon...</p>
+              </Card>
+            )}
           </Suspense>
         </div>
       </main>

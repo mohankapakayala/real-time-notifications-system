@@ -1,0 +1,127 @@
+/* Component-specific utility classes */
+
+/* Colors */
+.text-primary {
+  color: var(--foreground);
+}
+
+.text-secondary {
+  color: #71717a;
+}
+
+.text-muted {
+  color: #a1a1aa;
+}
+
+.text-icon {
+  color: #9ca3af;
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-background {
+  background-color: var(--background);
+}
+
+.bg-error {
+  background-color: var(--error);
+}
+
+.bg-success {
+  background-color: var(--success);
+}
+
+.bg-white {
+  background-color: var(--surface);
+}
+
+/* Borders */
+.border-default {
+  border-color: var(--border);
+}
+
+.border-sidebar {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Sidebar specific */
+.sidebar-bg {
+  background-color: var(--primary);
+}
+
+.sidebar-search-bg {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-search-border {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-menu-active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Notification badge */
+.notification-badge {
+  background-color: var(--error);
+}
+
+.notification-badge-dot {
+  background-color: var(--success);
+}
+
+/* Notification item states */
+.notification-unread-border {
+  border-left-color: var(--primary);
+}
+
+/* Button states */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #f4f4f5;
+  color: #71717a;
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  opacity: 0.8;
+}
+
+/* Input focus state */
+.input-focus {
+  border-color: var(--primary);
+}
+
+/* Chart colors */
+.chart-primary {
+  fill: var(--primary);
+}
+
+/* Pagination */
+.pagination-disabled {
+  background-color: #f4f4f5;
+  color: #a1a1aa;
+}
+
+.pagination-active {
+  background-color: var(--primary);
+  color: white;
+}
+
+.pagination-inactive {
+  background-color: var(--surface);
+  color: #71717a;
+  border: 1px solid var(--border);
+}
+
+/* Hover states */
+.hover\:text-error:hover {
+  color: var(--error);
+}
+

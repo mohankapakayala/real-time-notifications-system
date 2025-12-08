@@ -6,6 +6,7 @@ import { NotificationDropdownProps } from "@/types";
 import { MAX_DROPDOWN_NOTIFICATIONS } from "@/constants";
 import { formatTimeAsDate, formatTimeShort, sortNotifications } from "@/utils";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import "@/app/components.css";
 
 function NotificationDropdown({
   isOpen,
@@ -58,68 +59,44 @@ function NotificationDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border z-30"
-      style={{
-        borderColor: "#D4D4D8",
-        maxHeight: "500px",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border z-30 border-default flex flex-col max-h-[500px]"
     >
       {unreadNotifications.length === 0 ? (
-        <div className="p-6 text-center" style={{ color: "#71717A" }}>
+        <div className="p-6 text-center text-secondary">
           <p>No unread notifications</p>
         </div>
       ) : (
         <>
-          <div
-            className="overflow-y-auto flex-1"
-            style={{ maxHeight: "400px" }}
-          >
+          <div className="overflow-y-auto flex-1 max-h-[400px]">
             {unreadNotifications.map((notification, index) => (
               <div
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification.id)}
-                className="flex items-start gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                style={{
-                  borderBottom:
-                    index < unreadNotifications.length - 1
-                      ? "1px solid #F4F4F5"
-                      : "none",
-                }}
+                className={`flex items-start gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                  index < unreadNotifications.length - 1
+                    ? "border-b border-default"
+                    : ""
+                }`}
               >
-                <div
-                  className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-                  style={{ backgroundColor: "#30D158" }}
-                />
+                <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 notification-badge-dot" />
                 <div className="flex-1 min-w-0">
-                  <p
-                    className="font-medium text-sm mb-1"
-                    style={{ color: "#1A1A1A" }}
-                  >
+                  <p className="font-medium text-sm mb-1 text-primary">
                     {notification.message}
                   </p>
-                  <p className="text-xs" style={{ color: "#A1A1AA" }}>
+                  <p className="text-xs text-muted">
                     {formatTimeAsDate(notification.timestamp)}
                   </p>
                 </div>
-                <p
-                  className="text-xs flex-shrink-0 mt-2"
-                  style={{ color: "#A1A1AA" }}
-                >
+                <p className="text-xs flex-shrink-0 mt-2 text-muted">
                   {formatTimeShort(notification.timestamp)}
                 </p>
               </div>
             ))}
           </div>
-          <div
-            className="border-t py-3 px-4"
-            style={{ borderColor: "#D4D4D8" }}
-          >
+          <div className="border-t py-3 px-4 border-default">
             <button
               onClick={handleViewAll}
-              className="w-full text-center text-sm font-semibold transition-colors hover:opacity-80 cursor-pointer"
-              style={{ color: "#0A84FF" }}
+              className="w-full text-center text-sm font-semibold transition-colors hover:opacity-80 cursor-pointer text-primary"
             >
               View all
             </button>

@@ -1,11 +1,11 @@
 import { memo } from "react";
 import { CardProps } from "@/types";
+import "@/app/components.css";
 
 const Card = memo(function Card({ children, className = "" }: CardProps) {
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm border p-6 ${className}`}
-      style={{ borderColor: "#D4D4D8" }}
+      className={`bg-white rounded-lg shadow-sm border p-6 border-default ${className}`}
     >
       {children}
     </div>
