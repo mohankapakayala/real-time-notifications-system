@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useState, useRef, lazy, Suspense, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+} from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import Sidebar from "@/components/Sidebar";
 import NotificationDropdown from "@/components/NotificationDropdown";
@@ -27,8 +34,9 @@ export default function Home() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const { unreadCount } = useNotifications();
+  const { unreadCount, addNotification } = useNotifications();
   const bellIconRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Memoized handlers to prevent unnecessary re-renders
   const toggleMobileMenu = useCallback(() => {
@@ -47,6 +55,42 @@ export default function Home() {
     setActivePage("notifications");
     setShowDropdown(false);
   }, []);
+
+  // Simulate real-time notifications
+  useEffect(() => {
+    const generateNotification = async () => {
+      try {
+        const response = await fetch("/api/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "generate" }),
+        });
+        const data = await response.json();
+        if (data.success && data.notification) {
+          addNotification(data.notification);
+        }
+      } catch (error) {
+        console.error("Error generating notification:", error);
+      }
+    };
+
+    // Generate a notification every 10-30 seconds
+    const scheduleNext = () => {
+      const delay = Math.random() * 20000 + 10000; // 10-30 seconds
+      intervalRef.current = setTimeout(() => {
+        generateNotification();
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
+
+    return () => {
+      if (intervalRef.current) {
+        clearTimeout(intervalRef.current);
+      }
+    };
+  }, [addNotification]);
 
   return (
     <div
