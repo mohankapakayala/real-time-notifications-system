@@ -49,6 +49,17 @@ function Sidebar({
     }
   }, [setIsMobileOpen]);
 
+  // Filter menu items based on search query
+  const filteredMenuItems = React.useMemo(() => {
+    if (!searchQuery.trim()) {
+      return MENU_ITEMS;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return MENU_ITEMS.filter((item) =>
+      item.label.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -93,25 +104,31 @@ function Sidebar({
 
         {/* Menu */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          {MENU_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = activePage === item.id;
+          {filteredMenuItems.length > 0 ? (
+            filteredMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activePage === item.id;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => handlePageChange(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
-                  isActive
-                    ? "text-white shadow-md sidebar-menu-active"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handlePageChange(item.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all cursor-pointer ${
+                    isActive
+                      ? "text-white shadow-md sidebar-menu-active"
+                      : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })
+          ) : (
+            <div className="text-center py-8 text-white/50">
+              <p className="text-sm">No results found</p>
+            </div>
+          )}
         </nav>
       </div>
     </>

@@ -33,12 +33,17 @@ function Analytics() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const data = DAYS_OF_WEEK.map((day, index) => {
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
       const dayDate = new Date(today);
-      dayDate.setDate(today.getDate() - (6 - index));
+      dayDate.setDate(today.getDate() - i);
       dayDate.setHours(0, 0, 0, 0);
       const nextDay = new Date(dayDate);
       nextDay.setDate(dayDate.getDate() + 1);
+
+      // Get the actual day name for this date
+      const dayIndex = dayDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const dayName = DAYS_OF_WEEK[dayIndex];
 
       // Check if this is today
       const isToday = dayDate.getTime() === today.getTime();
@@ -49,12 +54,16 @@ function Analytics() {
           const notifDate = new Date(notif.timestamp);
           return notifDate >= dayDate && notifDate < nextDay;
         }).length;
-        return { name: day, value: count };
+        data.push({ name: dayName, value: count });
       } else {
-        // Use mock data for previous days
-        return { name: day, value: MOCK_DAILY_NOTIFICATION_COUNTS[index] || 0 };
+        // Use mock data for previous days (use a consistent index based on position)
+        const mockIndex = 6 - i; // Index for mock data array
+        data.push({
+          name: dayName,
+          value: MOCK_DAILY_NOTIFICATION_COUNTS[mockIndex] || 0,
+        });
       }
-    });
+    }
     return data;
   }, [notifications]);
 
