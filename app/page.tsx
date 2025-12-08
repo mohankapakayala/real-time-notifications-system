@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import React, { useState, useRef, lazy, Suspense, useCallback } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import Sidebar from "@/components/Sidebar";
 import NotificationDropdown from "@/components/NotificationDropdown";
-import { Bell, Menu } from "lucide-react";
+import BellIcon from "@/components/BellIcon";
+import { Menu } from "lucide-react";
 import Card from "@/components/Card";
+import { APP_TITLE, COLORS } from "@/constants";
 
 const NotificationList = lazy(() => import("@/components/NotificationList"));
 const Analytics = lazy(() => import("@/components/Analytics"));
@@ -28,10 +30,28 @@ export default function Home() {
   const { unreadCount } = useNotifications();
   const bellIconRef = useRef<HTMLDivElement>(null);
 
+  // Memoized handlers to prevent unnecessary re-renders
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileOpen((prev) => !prev);
+  }, []);
+
+  const toggleDropdown = useCallback(() => {
+    setShowDropdown((prev) => !prev);
+  }, []);
+
+  const closeDropdown = useCallback(() => {
+    setShowDropdown(false);
+  }, []);
+
+  const handleViewAll = useCallback(() => {
+    setActivePage("notifications");
+    setShowDropdown(false);
+  }, []);
+
   return (
     <div
       className="flex min-h-screen overflow-hidden"
-      style={{ backgroundColor: "#FAFAFA" }}
+      style={{ backgroundColor: COLORS.BACKGROUND }}
     >
       {/* Sidebar */}
       <Sidebar
@@ -50,9 +70,10 @@ export default function Home() {
             <div className="flex justify-between items-center gap-4">
               {/* Mobile menu button */}
               <button
-                onClick={() => setIsMobileOpen(!isMobileOpen)}
+                onClick={toggleMobileMenu}
                 className="lg:hidden p-2 rounded-xl shadow-md"
-                style={{ backgroundColor: "#0A84FF" }}
+                style={{ backgroundColor: COLORS.PRIMARY }}
+                aria-label="Toggle menu"
               >
                 <Menu className="w-6 h-6 text-white" />
               </button>
@@ -60,34 +81,18 @@ export default function Home() {
               {/* Title — same on mobile */}
               <h1
                 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate flex-1"
-                style={{ color: "#1A1A1A" }}
+                style={{ color: COLORS.TEXT_PRIMARY }}
               >
-                Real-Time Notification System
+                {APP_TITLE}
               </h1>
 
               {/* Desktop Bell */}
-              <div className="hidden lg:block relative">
-                <div
-                  ref={bellIconRef}
-                  className="cursor-pointer relative"
-                  onClick={() => setShowDropdown((p) => !p)}
-                >
-                  <Bell className="w-6 h-6" style={{ color: "#1A1A1A" }} />
-
-                  {unreadCount > 0 && (
-                    <span
-                      className="absolute -top-2 -right-2 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse"
-                      style={{ backgroundColor: "#FF453A" }}
-                    >
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </div>
-
+              <div className="hidden lg:block relative" ref={bellIconRef}>
+                <BellIcon unreadCount={unreadCount} onClick={toggleDropdown} />
                 <NotificationDropdown
                   isOpen={showDropdown}
-                  onClose={() => setShowDropdown(false)}
-                  onViewAll={() => setActivePage("notifications")}
+                  onClose={closeDropdown}
+                  onViewAll={handleViewAll}
                   bellIconRef={bellIconRef}
                 />
               </div>
@@ -96,26 +101,15 @@ export default function Home() {
             {/* MOBILE — Bell Icon BELOW Title */}
             <div className="lg:hidden flex justify-end mt-4">
               <div className="relative" ref={bellIconRef}>
-                <div
-                  className="cursor-pointer relative"
-                  onClick={() => setShowDropdown((p) => !p)}
-                >
-                  <Bell className="w-7 h-7" style={{ color: "#1A1A1A" }} />
-
-                  {unreadCount > 0 && (
-                    <span
-                      className="absolute -top-2 -right-2 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse"
-                      style={{ backgroundColor: "#FF453A" }}
-                    >
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </div>
-
+                <BellIcon
+                  unreadCount={unreadCount}
+                  onClick={toggleDropdown}
+                  className="w-7 h-7"
+                />
                 <NotificationDropdown
                   isOpen={showDropdown}
-                  onClose={() => setShowDropdown(false)}
-                  onViewAll={() => setActivePage("notifications")}
+                  onClose={closeDropdown}
+                  onViewAll={handleViewAll}
                   bellIconRef={bellIconRef}
                 />
               </div>

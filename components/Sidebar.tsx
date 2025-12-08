@@ -1,10 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { FolderOpen, Bell, BarChart3, Settings, Search, X } from "lucide-react";
 import { SidebarProps } from "@/types";
+import { COLORS } from "@/constants";
 
-export default function Sidebar({
+// Move menuItems outside component to avoid recreation on every render
+const MENU_ITEMS = [
+  { id: "dashboard", label: "Dashboard", icon: FolderOpen },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "settings", label: "Settings", icon: Settings },
+] as const;
+
+function Sidebar({
   activePage,
   onPageChange,
   isMobileOpen = false,
@@ -24,19 +33,21 @@ export default function Sidebar({
     };
   }, [isMobileOpen]);
 
-  const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: FolderOpen },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
-    { id: "settings", label: "Settings", icon: Settings },
-  ];
+  const handlePageChange = useCallback(
+    (page: string) => {
+      onPageChange(page);
+      if (setIsMobileOpen) {
+        setIsMobileOpen(false);
+      }
+    },
+    [onPageChange, setIsMobileOpen]
+  );
 
-  const handlePageChange = (page: string) => {
-    onPageChange(page);
+  const handleCloseMenu = useCallback(() => {
     if (setIsMobileOpen) {
       setIsMobileOpen(false);
     }
-  };
+  }, [setIsMobileOpen]);
 
   return (
     <>
@@ -44,7 +55,7 @@ export default function Sidebar({
       {isMobileOpen && setIsMobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
-          onClick={() => setIsMobileOpen(false)}
+          onClick={handleCloseMenu}
         />
       )}
 
@@ -53,7 +64,7 @@ export default function Sidebar({
         className={`w-64 text-white h-screen fixed left-0 top-0 flex flex-col z-30 transform transition-transform duration-300 ease-in-out ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
-        style={{ backgroundColor: "#0A84FF" }}
+        style={{ backgroundColor: COLORS.PRIMARY }}
       >
         {/* Mobile Close Button */}
         {isMobileOpen && setIsMobileOpen && (
@@ -62,7 +73,7 @@ export default function Sidebar({
             style={{ borderColor: "rgba(255,255,255,0.2)" }}
           >
             <button
-              onClick={() => setIsMobileOpen(false)}
+              onClick={handleCloseMenu}
               className="p-2 rounded-full hover:bg-white/10 transition"
               aria-label="Close menu"
             >
@@ -93,7 +104,7 @@ export default function Sidebar({
 
         {/* Menu */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          {menuItems.map((item) => {
+          {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activePage === item.id;
 
@@ -122,3 +133,5 @@ export default function Sidebar({
     </>
   );
 }
+
+export default memo(Sidebar);

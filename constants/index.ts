@@ -56,3 +56,21 @@ export const TOOLTIP_STYLE = {
   border: "1px solid #D4D4D8",
   borderRadius: "8px",
 } as const;
+
+// App title
+export const APP_TITLE = "Real-Time Notification System" as const;
+
+// Color constants
+export const COLORS = {
+  PRIMARY: "#0A84FF",
+  BACKGROUND: "#FAFAFA",
+  TEXT_PRIMARY: "#1A1A1A",
+  TEXT_SECONDARY: "#71717A",
+  BORDER: "#D4D4D8",
+  ERROR: "#FF453A",
+  SUCCESS: "#30D158",
+  WHITE: "#FFFFFF",
+} as const;
+
+// Badge display threshold
+export const BADGE_MAX_DISPLAY = 9;

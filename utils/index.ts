@@ -164,3 +164,13 @@ export function paginate<T>(
     endIndex,
   };
 }
+
+/**
+ * Formats notification count for badge display
+ * @param count - Number of unread notifications
+ * @param maxDisplay - Maximum number to display before showing "9+"
+ * @returns Formatted badge text (e.g., "5" or "9+")
+ */
+export function formatBadgeCount(count: number, maxDisplay: number = 9): string {
+  return count > maxDisplay ? `${maxDisplay}+` : String(count);
+}

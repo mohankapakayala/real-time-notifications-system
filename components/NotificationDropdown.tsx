@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, memo, useRef } from "react";
+import React, { useMemo, memo, useRef, useCallback } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { NotificationDropdownProps } from "@/types";
 import { MAX_DROPDOWN_NOTIFICATIONS } from "@/constants";
@@ -25,18 +25,33 @@ function NotificationDropdown({
     );
   }, [notifications]);
 
+  // Memoize click handler for notification items
+  const handleNotificationClick = useCallback(
+    (id: string) => {
+      markAsRead(id);
+    },
+    [markAsRead]
+  );
+
+  // Memoize view all handler
+  const handleViewAll = useCallback(() => {
+    onViewAll();
+    onClose();
+  }, [onViewAll, onClose]);
+
   // Close dropdown when clicking outside (but not on the bell icon)
-  useClickOutside(
-    dropdownRef,
-    (event) => {
+  const handleClickOutside = useCallback(
+    (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node;
       const isClickOnBell = bellIconRef?.current?.contains(target);
       if (!isClickOnBell && isOpen) {
         onClose();
       }
     },
-    isOpen
+    [bellIconRef, isOpen, onClose]
   );
+
+  useClickOutside(dropdownRef, handleClickOutside, isOpen);
 
   if (!isOpen) return null;
 
@@ -64,9 +79,7 @@ function NotificationDropdown({
             {unreadNotifications.map((notification, index) => (
               <div
                 key={notification.id}
-                onClick={() => {
-                  markAsRead(notification.id);
-                }}
+                onClick={() => handleNotificationClick(notification.id)}
                 className="flex items-start gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                 style={{
                   borderBottom:
@@ -104,10 +117,7 @@ function NotificationDropdown({
             style={{ borderColor: "#D4D4D8" }}
           >
             <button
-              onClick={() => {
-                onViewAll();
-                onClose();
-              }}
+              onClick={handleViewAll}
               className="w-full text-center text-sm font-semibold transition-colors hover:opacity-80 cursor-pointer"
               style={{ color: "#0A84FF" }}
             >
