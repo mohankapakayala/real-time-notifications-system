@@ -37,6 +37,8 @@ export interface NotificationListProps {
 export interface SidebarProps {
   activePage: string;
   onPageChange: (page: string) => void;
+  isMobileOpen?: boolean;
+  setIsMobileOpen?: (open: boolean) => void;
 }
 
 export interface CardProps {
