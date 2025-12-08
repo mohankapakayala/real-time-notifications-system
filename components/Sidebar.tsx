@@ -65,6 +65,7 @@ function Sidebar({
       {/* Mobile Overlay */}
       {isMobileOpen && setIsMobileOpen && (
         <div
+          data-testid="sidebar-overlay"
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
           onClick={handleCloseMenu}
         />
@@ -72,6 +73,7 @@ function Sidebar({
 
       {/* Sidebar */}
       <div
+        data-testid="sidebar-panel"
         className={`w-64 text-white h-screen fixed left-0 top-0 flex flex-col z-30 transform transition-transform duration-300 ease-in-out sidebar-bg ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
